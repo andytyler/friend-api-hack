@@ -19,5 +19,5 @@ export async function POST({ request }) {
 
 	// if it is boring then use
 
-	return json({ message: "Data received", data });
+	return json({ statusCode: 201, data: "success" });
 }

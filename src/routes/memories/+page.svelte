@@ -1,7 +1,9 @@
 <script>
 	import ConversationGrid from "./ConversationGrid.svelte";
 	export let memories;
-	console.log(memories);
+	console.log("memories", memories);
 </script>
 
-<ConversationGrid data={memories} />
+{#each memories as memory}
+	<ConversationGrid data={memory} />
+{/each}
