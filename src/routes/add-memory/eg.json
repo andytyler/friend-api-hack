@@ -1,0 +1,27 @@
+{
+	"id": 76,
+
+	"createdAt": "2024-07-23T20:00:46.121905",
+
+	"transcript": "Speaker 0: hey google volume 2",
+
+	"recordingFilePath": "/var/mobile/Containers/Data/Application/E5780486-30EC-4886-99E8-8ABE604FD289/Documents/recording-20240723_200046.wav",
+
+	"structured": {
+		"title": "",
+
+		"overview": "",
+
+		"emoji": "",
+
+		"category": "other",
+
+		"actionItems": [],
+
+		"events": []
+	},
+
+	"pluginsResponse": [],
+
+	"discarded": true
+}
