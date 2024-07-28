@@ -1,7 +1,9 @@
 import { supabase } from "$lib/supabase";
 import { json } from "@sveltejs/kit";
 
-export async function POST({ request }) {
+export async function POST({ request, url }) {
+	const uid = url.searchParams.get("uid"); // Replace 'paramName' with your actual query parameter name
+
 	const raw_memory = await request.json(); // Extract data from the request body
 
 	console.log("🧠 raw_memory >>>>");
@@ -12,7 +14,7 @@ export async function POST({ request }) {
 
 	const { data, error } = await supabase
 		.from("memories")
-		.insert([{ memory: raw_memory }])
+		.insert([{ memory: raw_memory, uid: uid }])
 		.select("*");
 
 	if (error || !data) {
