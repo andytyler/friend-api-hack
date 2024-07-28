@@ -4,9 +4,9 @@
 
 	export let data;
 
-	console.log(data);
+	console.log("INDIVIDUAL MEM + ", data);
 
-	let recording = data.recording;
+	let recording = data.memory;
 	let showDetails = false;
 
 	function toggleDetails() {

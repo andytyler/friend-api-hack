@@ -1,9 +1,13 @@
 <script>
 	import ConversationGrid from "./ConversationGrid.svelte";
-	export let memories;
-	console.log("memories", memories);
+	export let data;
+	console.log("data", data);
 </script>
 
-{#each memories as memory}
-	<ConversationGrid data={memory} />
-{/each}
+{#if data?.memories}
+	{#each data.memories as memory}
+		<ConversationGrid data={memory} />
+	{/each}
+{:else}
+	<p>No memories found</p>
+{/if}
