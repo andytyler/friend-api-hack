@@ -2,7 +2,7 @@ import { supabase } from "$lib/supabase";
 import { json } from "@sveltejs/kit";
 
 export async function POST({ request, url }) {
-	const uid = url.searchParams.get("uid"); // Replace 'paramName' with your actual query parameter name
+	const uid = url.searchParams.get("uid");
 
 	const raw_memory = await request.json(); // Extract data from the request body
 
