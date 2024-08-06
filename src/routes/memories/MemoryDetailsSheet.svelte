@@ -1,75 +1,81 @@
 <script>
-    import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "$lib/components/ui/sheet";
-    import { Button } from "$lib/components/ui/button";
-    import PluginResponse from "./PluginResponse.svelte";
+	import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "$lib/components/ui/sheet";
+	import { Button } from "$lib/components/ui/button";
+	import { Badge } from "$lib/components/ui/badge";
+	import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "$lib/components/ui/accordion";
+	import PluginResponse from "./PluginResponse.svelte";
+	import { isOpen, selectedMemory } from "$lib/stores/memoryStore";
 
-    export let selectedMemory;
-    export let isOpen;
+	function closeSheet() {
+		isOpen.set(false);
+	}
 </script>
 
-<Sheet bind:open={isOpen}>
-    <SheetContent class="overflow-y-auto w-1/2">
-        <SheetHeader>
-            <SheetTitle>{selectedMemory?.memory.structured.title || "No Title"}</SheetTitle>
-            <SheetDescription>
-                {#if selectedMemory}
-                    <div class="mt-4 space-y-4">
-                        <p class="text-sm text-gray-500">{selectedMemory.memory.structured.overview}</p>
+<Sheet bind:open={$isOpen}>
+	<SheetContent class="overflow-y-auto w-96 bg-gray-900 min-w-1/2">
+		<SheetHeader>
+			<SheetTitle class="text-3xl font-bold text-emerald-400">
+				{$selectedMemory?.memory?.structured?.title || "Untitled Memory"}
+			</SheetTitle>
+			<Badge variant="secondary" class="mb-4 text-sm text-emerald-100 bg-emerald-700">
+				{$selectedMemory?.memory?.structured?.category || "Uncategorized"}
+			</Badge>
+		</SheetHeader>
+		<SheetDescription>
+			{#if $selectedMemory}
+				<div class="space-y-6">
+					<p class="text-lg text-gray-300">{$selectedMemory.memory?.structured?.overview}</p>
 
-                        <div>
-                            <h4 class="text-sm font-semibold">Category:</h4>
-                            <p class="text-sm text-gray-500">{selectedMemory.memory.structured.category}</p>
-                        </div>
+					<Accordion type="single" collapsible class="w-full">
+						<AccordionItem value="action-items">
+							<AccordionTrigger class="text-emerald-400">Action Items</AccordionTrigger>
+							<AccordionContent>
+								<ul class="list-disc list-inside text-gray-300">
+									{#each $selectedMemory.memory.structured.actionItems as item}
+										<li>{item}</li>
+									{/each}
+								</ul>
+							</AccordionContent>
+						</AccordionItem>
 
-                        <div>
-                            <h4 class="text-sm font-semibold">Action Items:</h4>
-                            <ul class="text-sm list-disc list-inside text-gray-500">
-                                {#each selectedMemory.memory.structured.actionItems as item}
-                                    <li>{item}</li>
-                                {/each}
-                            </ul>
-                        </div>
+						<AccordionItem value="events">
+							<AccordionTrigger class="text-emerald-400">Events</AccordionTrigger>
+							<AccordionContent>
+								<ul class="list-disc list-inside text-gray-300">
+									{#each $selectedMemory.memory.structured.events as event}
+										<li>{event}</li>
+									{/each}
+								</ul>
+							</AccordionContent>
+						</AccordionItem>
 
-                        <div>
-                            <h4 class="text-sm font-semibold">Events:</h4>
-                            <ul class="text-sm list-disc list-inside text-gray-500">
-                                {#each selectedMemory.memory.structured.events as event}
-                                    <li>{event}</li>
-                                {/each}
-                            </ul>
-                        </div>
+						<AccordionItem value="transcript">
+							<AccordionTrigger class="text-emerald-400">Transcript</AccordionTrigger>
+							<AccordionContent>
+								<p class="text-gray-300 whitespace-pre-wrap">{$selectedMemory.memory.transcript}</p>
+							</AccordionContent>
+						</AccordionItem>
 
-                        <div>
-                            <h4 class="text-sm font-semibold">Date Created:</h4>
-                            <p class="text-sm text-gray-500">{new Date(selectedMemory.createdAt).toLocaleString()}</p>
-                        </div>
+						{#if $selectedMemory.memory.pluginsResponse.length > 0}
+							<AccordionItem value="plugin-responses">
+								<AccordionTrigger class="text-emerald-400">Plugin Responses</AccordionTrigger>
+								<AccordionContent>
+									{#each $selectedMemory.memory.pluginsResponse as response}
+										<PluginResponse pluginResponse={response} />
+									{/each}
+								</AccordionContent>
+							</AccordionItem>
+						{/if}
+					</Accordion>
 
-                        <div>
-                            <h4 class="text-sm font-semibold">Transcript:</h4>
-                            <p class="text-sm text-gray-500">{selectedMemory.memory.transcript}</p>
-                        </div>
-
-                        {#if selectedMemory.memory.pluginsResponse.length > 0}
-                            <div>
-                                <h4 class="text-sm font-semibold">Plugin Responses:</h4>
-                                {#each selectedMemory.memory.pluginsResponse as response}
-                                    <PluginResponse pluginResponse={response} />
-                                {/each}
-                            </div>
-                        {/if}
-                    </div>
-                {/if}
-            </SheetDescription>
-        </SheetHeader>
-        <div class="mt-6">
-            <Button on:click={() => (isOpen = false)}>Close</Button>
-        </div>
-    </SheetContent>
+					<div class="text-sm text-gray-400">
+						Created: {new Date($selectedMemory.createdAt).toLocaleString()}
+					</div>
+				</div>
+			{/if}
+		</SheetDescription>
+		<div class="mt-6">
+			<Button variant="outline" on:click={closeSheet}>Close</Button>
+		</div>
+	</SheetContent>
 </Sheet>
-
-
-<style>
-    :global(body) {
-        background-color: #111827;
-    }
-</style>

@@ -11,7 +11,8 @@ export async function load() {
 	}
 
 	if (data) {
-		console.log("🧠 memories FETCHED >> ", data);
+		console.log("|🧠  MEMORIES RECIEVED = ", data.length);
+		console.log("|🧠  MEMORIES RECIEVED = ", data);
 	}
 
 	return {
