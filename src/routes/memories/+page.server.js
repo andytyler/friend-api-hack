@@ -16,6 +16,6 @@ export async function load() {
 	}
 
 	return {
-		memories: data,
+		memories: [], //data,
 	};
 }
