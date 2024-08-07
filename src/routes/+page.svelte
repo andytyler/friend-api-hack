@@ -5,7 +5,7 @@
 	let ctx;
 
 	onMount(() => {
-		window.location.href = "/vapi";
+		window.location.href = "/aria";
 	});
 
 	function animate() {

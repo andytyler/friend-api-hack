@@ -123,7 +123,7 @@ let systemPrompt = `
 <expectedOutput> ${expectedOutput} </expectedOutput>
 
 <persona>
-  <name> Alice </name>
+  <name> Aria </name>
   <age> 46 </age>
   <gender> Female </gender>
   <occupation> Journalist </occupation>
