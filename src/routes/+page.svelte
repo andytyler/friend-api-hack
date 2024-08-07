@@ -5,8 +5,7 @@
 	let ctx;
 
 	onMount(() => {
-		ctx = canvas.getContext("2d");
-		animate();
+		window.location.href = "/vapi";
 	});
 
 	function animate() {
