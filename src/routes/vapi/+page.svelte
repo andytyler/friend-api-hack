@@ -2,23 +2,43 @@
 	import { onMount } from "svelte";
 	import Vapi from "@vapi-ai/web";
 	import { browser } from "$app/environment";
+	import { marked } from "marked";
+
+	let name = "";
+	let loading = false; // Add loading state
+	let call_active = false;
+	let loading_article = false;
 
 	const vapi = new Vapi("a550153d-a8ee-415f-8daa-f0745f383e82");
 
-	async function startVapi() {
-		await vapi.start("19ac30e7-530f-4aa4-a797-cd8c0b67532f");
-		addName();
-		title = `Interview with ${name} & Alice`;
-	}
+	const assistantOverrides = {
+		variableValues: {
+			name,
+		},
+	};
 
-	function addName() {
+	async function startVapi() {
+		loading = true; // Set loading state to true
+		await vapi.start("19ac30e7-530f-4aa4-a797-cd8c0b67532f", assistantOverrides);
+		title = `Interview with ${name} & Alice`;
+		loading = false; // Set loading state to false
+		call_active = true;
+		scrollToDiv("transcript");
+
 		vapi.send({
 			type: "add-message",
 			message: {
-				role: "tool",
-				content: `Alice is interviewing a person named "${name}"`,
+				role: "system",
+				content: `Interviewee name is "${name}". \n\n Please interview them about the following topic.\n  <topic>${topic}</topic>`,
 			},
 		});
+	}
+
+	function scrollToDiv(id: string) {
+		const element = document.getElementById(id); // Change to your target div ID
+		if (element) {
+			element.scrollIntoView({ behavior: "smooth" });
+		}
 	}
 
 	let transcriptEg = {
@@ -28,10 +48,8 @@
 		transcript: "end call.",
 	};
 
-	export let data;
-	let name = "Your Name";
-
 	let title = "";
+	let topic = "";
 
 	let messages: any[] = [];
 
@@ -43,6 +61,30 @@
 	vapi.on("error", (e) => {
 		console.error(e);
 	});
+
+	let final_article = "";
+
+	async function endCall() {
+		loading_article = true;
+		vapi.stop();
+		let justFinalMessages = messages.filter((message) => message.transcriptType === "final" && message.type === "transcript");
+		let transcript = justFinalMessages.map((message) => message.transcript).join("\n");
+
+		const response = await fetch("/api/gen-article", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ transcript }),
+		});
+
+		const res = await response.json();
+
+		console.log(res.article);
+		final_article = await marked(res.article);
+
+		loading_article = false;
+	}
 </script>
 
 <!-- Background -->
@@ -65,80 +107,99 @@
 			class="object-contain absolute inset-0 w-full h-full bg-clip-content bg-gradient-to-b to-transparent mask-transparent from-black/0" />
 	</div>
 
-	<!-- Slash Text -->
-	<div class="z-30 p-8 w-full max-w-3xl text-center drop-shadow-md mt-[450px]">
-		<h1 class="mb-4 text-6xl font-bold text-foreground">
+	<!-- Heading Text -->
+	<div class="z-30 py-8 w-full max-w-3xl text-center drop-shadow-md mt-[450px]">
+		<h1 class="mb-4 text-6xl font-extrabold text-foreground">
 			Meet
 			<span class="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-accent">Alice Bethbeau</span>
 			Your in-house Journalist.
 		</h1>
-		<p class="mb-8 text-2xl drop-shadow-md text-background-foreground">10 min interview, to Human grade press article.</p>
+		<p class="mb-8 text-3xl drop-shadow-md text-background-foreground">10 min interview, to Human-grade press article.</p>
 
-		<div class="mb-8">
-			<input
-				type="text"
-				bind:value={name}
-				placeholder="Enter your name"
-				class="px-4 py-2 mr-2 text-lg rounded-lg border-2 border-input focus:outline-none focus:border-ring" />
-			{#if browser}
-				<button
-					on:click={startVapi}
-					class="px-8 py-2 text-lg font-semibold bg-gradient-to-r rounded-lg transition duration-300 text-secondary-foreground from-secondary to-accent hover:from-secondary/90 hover:to-accent/90">
-					Start Interview
-				</button>
-			{/if}
-		</div>
-	</div>
-
-	{#if messages.length > 0}
-		<section id="transcript" class="p-4 mt-12 w-full max-w-3xl rounded-lg border shadow-lg bg-card border-border">
-			<div class="flex justify-between mb-6 w-full">
-				<h2 class="flex text-2xl font-bold text-left text-card-foreground">{title}</h2>
-
-				<div class="flex justify-end">
-					<div class="w-2 h-2 rounded-full animate-pulse bg-secondary"></div>
-					<span class="inline-flex items-center px-3 py-1 text-xs font-medium capitalize rounded-full text-accent-foreground bg-accent">
-						Interview in Progress
-					</span>
+		{#if loading}
+			<div class="flex justify-center items-center flex-row gap-2 loading-icon">
+				<div class="w-4 h-4 rounded-full animate-pulse bg-secondary"></div>
+				Loading...
+			</div>
+		{:else if !call_active}
+			<div class="mb-4">
+				<textarea
+					rows="3"
+					cols="30"
+					bind:value={topic}
+					placeholder="What would you like the article to be about?"
+					class="px-4 mb-2 py-2 mr-2 w-full h-16 text-lg rounded-lg border-2 border-input focus:outline-none focus:border-ring" />
+				<div class="flex flex-row">
+					<input
+						type="text"
+						bind:value={name}
+						placeholder="Enter your name"
+						class="px-4 py-2 mr-2 w-full text-lg rounded-lg border-2 border-input focus:outline-none focus:border-ring" />
+					{#if browser}
+						<button
+							on:click={startVapi}
+							disabled={!name || name.length < 2}
+							class="px-8 py-2 text-lg font-semibold text-nowrap bg-gradient-to-r rounded-lg transition duration-300 text-secondary-foreground from-secondary to-accent hover:from-secondary/90 hover:to-accent/90">
+							{loading ? "Loading..." : "Start Interview"}
+						</button>
+					{/if}
 				</div>
 			</div>
-
-			<div class="flex flex-col gap-2 w-full">
-				{#each messages as message}
-					{#if message.type === "transcript" && message.transcriptType === "final"}
-						{#if message.role === "user"}
-							<div class="justify-end p-2 w-1/2 min-w-max rounded-lg border max-w-2/3 text-accent-foreground bg-accent border-border">
-								{message.transcript}
-							</div>
-						{/if}
-						{#if message.role === "assistant"}
-							<div class="justify-start p-2 w-1/2 min-w-max rounded-lg border max-w-2/3 text-card-foreground bg-card border-border">
-								{message.transcript}
-							</div>
-						{/if}
-						{#if message.role === "tool"}
-							<div class="justify-center p-2 w-1/2 min-w-max rounded-lg border max-w-2/3 text-card-foreground bg-card border-border">
-								{message.transcript}
-							</div>
-						{/if}
-					{/if}
-				{/each}
-			</div>
-		</section>
-	{/if}
-
-	<!-- <section class="p-8 mt-12 w-full max-w-3xl rounded-lg shadow-lg bg-card">
-		<h2 class="mb-6 text-3xl font-bold text-center text-card-foreground">Interview Highlights</h2>
-		{#if data?.highlights && data?.highlights.length > 0}
-			<ul class="space-y-2">
-				{#each data.highlights as highlight}
-					<li class="p-3 text-lg rounded-lg text-muted-foreground bg-accent">{highlight}</li>
-				{/each}
-			</ul>
-		{:else}
-			<p class="text-lg text-center text-muted-foreground">No highlights available yet. Start your interview to see results!</p>
 		{/if}
-	</section> -->
+	</div>
+
+	{#if call_active}
+		{#if messages.length > 0}
+			<section id="transcript" class=" my-4 w-full max-w-3xl rounded-lg border shadow-lg bg-card border-border">
+				<!-- headder -->
+				<div class="flex justify-between p-4 bg-background rounded-lg border-b-1 border-border w-full">
+					<h2 class="flex text-2xl font-bold text-left text-card-foreground">{title}</h2>
+
+					<div class="flex justify-end">
+						<span class="inline-flex items-center px-3 py-1 text-xs font-medium capitalize rounded-full text-primary-foreground bg-primary">
+							<div class="w-4 h-4 mr-2 rounded-full animate-pulse capitalize bg-secondary-foreground"></div>
+							Interview in Progress
+						</span>
+					</div>
+				</div>
+
+				<!-- content -->
+				<div class="flex flex-col gap-2 w-full p-4">
+					{#each messages as message}
+						{#if message.type === "transcript" && message.transcriptType === "final"}
+							{#if message.role === "user"}
+								<div class="self-end p-2 w-1/2 max-w-max rounded-lg border max-w-2/3 text-accent-foreground bg-accent border-border">
+									{message.transcript}
+								</div>
+							{/if}
+							{#if message.role === "assistant"}
+								<div class="self-start p-2 w-1/2 max-w-max rounded-lg border max-w-2/3 text-card-foreground bg-card border-border">
+									{message.transcript}
+								</div>
+							{/if}
+							{#if message.role === "tool"}
+								<div class="self-center p-2 w-1/2 max-w-max rounded-lg border max-w-2/3 text-card-foreground bg-card border-border">
+									{message.transcript}
+								</div>
+							{/if}
+						{/if}
+					{/each}
+				</div>
+			</section>
+		{/if}
+	{/if}
+	{#if call_active}
+		<div class="max-w-3xl flex flex-col mb-4 justify-between w-full border border-border rounded-lg p-4 bg-card text-card-foreground">
+			<button
+				class="w-full rounded-lg p-4 bg-gradient-to-br from-accent to-secondary text-accent-foreground hover:from-secondary hover:to-accent active:from-secondary/90 active:to-accent/90"
+				on:click={endCall}>{loading_article ? "Generating Article..." : "End Call"}</button>
+			{#if final_article && final_article.length > 0}
+				<article class="w-full">
+					{@html final_article}
+				</article>
+			{/if}
+		</div>
+	{/if}
 </main>
 
 <style>

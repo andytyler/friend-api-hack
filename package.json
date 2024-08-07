@@ -31,7 +31,9 @@
 		"bits-ui": "^0.21.12",
 		"clsx": "^2.1.1",
 		"dotenv": "^16.4.5",
+		"groq-sdk": "^0.5.0",
 		"lucide-svelte": "^0.417.0",
+		"marked": "^14.0.0",
 		"mode-watcher": "^0.4.1",
 		"tailwind-merge": "^2.4.0",
 		"tailwind-variants": "^0.2.1"
