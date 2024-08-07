@@ -110,7 +110,7 @@
 	<!-- Heading Text -->
 	<div class="z-30 py-8 w-full max-w-3xl text-center drop-shadow-md mt-[450px]">
 		<h1 class="mb-4 text-6xl font-extrabold text-foreground">
-			Meet<span class="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-accent">Aria Iverson</span>
+			Meet <span class="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-accent">Aria Iverson</span>
 			<br />Your in-house Journalist.
 		</h1>
 		<p class="mb-8 text-3xl drop-shadow-md text-background-foreground">10 min interview, to Human-grade press article.</p>
