@@ -11,15 +11,13 @@
 
 	const vapi = new Vapi("a550153d-a8ee-415f-8daa-f0745f383e82");
 
-	const assistantOverrides = {
-		variableValues: {
-			name,
-		},
-	};
-
 	async function startVapi() {
 		loading = true; // Set loading state to true
-		await vapi.start("19ac30e7-530f-4aa4-a797-cd8c0b67532f", assistantOverrides);
+		await vapi.start("19ac30e7-530f-4aa4-a797-cd8c0b67532f", {
+			variableValues: {
+				name,
+			},
+		});
 		title = `Interview with ${name} & Alice`;
 		loading = false; // Set loading state to false
 		call_active = true;
@@ -33,6 +31,16 @@
 			},
 		});
 	}
+
+	// function say(message: string) {
+	// 	vapi.send({
+	// 		type: "add-message",
+	// 		message: {
+	// 			role: "system",
+	// 			content: message,
+	// 		},
+	// 	});
+	// }
 
 	function scrollToDiv(id: string) {
 		const element = document.getElementById(id); // Change to your target div ID
@@ -102,8 +110,8 @@
 	<!-- Alice Image -->
 	<div class="absolute -inset-y-20 w-2/3 h-full drop-shadow-md x-auto">
 		<img
-			src="/alice.png"
-			alt="Alice Bethbeau"
+			src="/aria.png"
+			alt="Aria Iverson"
 			class="object-contain absolute inset-0 w-full h-full bg-clip-content bg-gradient-to-b to-transparent mask-transparent from-black/0" />
 	</div>
 
@@ -159,6 +167,7 @@
 							<div class="w-4 h-4 mr-2 rounded-full animate-pulse capitalize bg-secondary-foreground"></div>
 							Interview in Progress
 						</span>
+						<!-- <button on:click={() => say("say Chicken Nugget")}>End Call</button> -->
 					</div>
 				</div>
 
